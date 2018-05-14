@@ -340,11 +340,11 @@ func (b *TkhdBox) parse() error {
 		b.Duration = uint64(binary.BigEndian.Uint32(b.raw[20:24]))
 		offset = 24
 	} else if b.version == 1 {
-		b.CreationTime = uint64(binary.BigEndian.Uint64(b.raw[4:12]))
-		b.ModificationTime = uint64(binary.BigEndian.Uint64(b.raw[12:20]))
+		b.CreationTime = binary.BigEndian.Uint64(b.raw[4:12])
+		b.ModificationTime = binary.BigEndian.Uint64(b.raw[12:20])
 		b.TrackID = binary.BigEndian.Uint32(b.raw[20:24])
 		// 24:28 reserved
-		b.Duration = uint64(binary.BigEndian.Uint64(b.raw[28:36]))
+		b.Duration = binary.BigEndian.Uint64(b.raw[28:36])
 		offset = 36
 	}
 	offset += 8 // reserved bytes
