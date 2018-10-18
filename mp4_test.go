@@ -2,7 +2,6 @@ package bmff
 
 import (
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,7 +26,7 @@ func TestParse(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []Box
+		want    File
 		wantErr bool
 	}{
 		{
@@ -35,25 +34,24 @@ func TestParse(t *testing.T) {
 			args: args{
 				src: readerFromFixture(t, filepath.Join("testdata", "01_simple.mp4")),
 			},
-			want: []Box{
-				&box{
-					boxtype: "ftyp",
-					size:    uint32(18),
+			want: File{
+				Movie: &Movie{
+					box: &box{
+						boxtype: "ftyp",
+					},
 				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, err := Parse(tt.args.src)
+			_, err := Parse(tt.args.src)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			log.Printf(`
-Ftyp: %+v\n
-Moov: %+v\n
-`, f.Ftyp, f.Moov)
+
+			// spew.Dump(f.Movie.Tracks[0].Media)
 		})
 	}
 }

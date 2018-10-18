@@ -1,4 +1,4 @@
-package bmff
+package fixed
 
 import (
 	"testing"
