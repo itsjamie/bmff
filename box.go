@@ -27,6 +27,25 @@ type box struct {
 	raw       []byte
 }
 
+func (b *box) Size() uint64 {
+	if b == nil {
+		return 0
+	}
+
+	if b.size == 1 {
+		return b.largesize
+	}
+	return uint64(b.size)
+}
+
+func (b *box) Type() string {
+	return b.boxtype
+}
+
+func (b *box) Raw() []byte {
+	return b.raw
+}
+
 type fullbox struct {
 	box
 	version uint8
