@@ -7,38 +7,45 @@ import (
 type TrakBox struct {
 	*box
 	Header    *TrackHeader
-	Reference *TrefBox
+	Reference *TrackReference
 	Media     *Media
 }
 
 func (b *TrakBox) parse() error {
 	for subBox := range readBoxes(b.raw) {
-		if subBox == nil {
-			break
-		}
-
-		switch t := subBox.boxtype; t {
+		var fb *fullbox
+		switch subBox.boxtype {
 		case "tkhd":
-			header := &TrackHeader{box: subBox}
-			if err := header.parse(); err != nil {
+			fb = &fullbox{box: subBox}
+			if err := fb.decode(); err != nil {
 				return err
 			}
-			b.Header = header
+
+		}
+
+		switch subBox.boxtype {
+		case "tkhd":
+			tkhd := &TrackHeader{fullbox: fb}
+			if err := tkhd.parse(); err != nil {
+				return err
+			}
+			b.Header = tkhd
+		case "tref":
+			tref := &TrackReference{box: subBox}
+			if err := tref.parse(); err != nil {
+				return err
+			}
+			b.Reference = tref
 		case "mdia":
 			mdia := &Media{box: subBox}
 			if err := mdia.parse(); err != nil {
 				return err
 			}
 			b.Media = mdia
-		case "tref":
-			tref := &TrefBox{box: subBox}
-			if err := tref.parse(); err != nil {
-				return err
-			}
-			b.Reference = tref
 		default:
-			return fmt.Errorf("unknown box in trak: %s", t)
+			return fmt.Errorf("unknown 'trak' child: %s", subBox.Type())
 		}
+
 	}
 
 	return nil

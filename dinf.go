@@ -1,9 +1,11 @@
 package bmff
 
+import "fmt"
+
 type DataInformation struct {
 	*box
 }
 
 func (b *DataInformation) parse() error {
-	return nil
+	return fmt.Errorf("not implemented")
 }

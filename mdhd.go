@@ -3,9 +3,7 @@ package bmff
 import "encoding/binary"
 
 type MediaHeader struct {
-	*box
-	version          uint8
-	flags            [3]byte
+	*fullbox
 	CreationTime     uint64
 	ModificationTime uint64
 	TimeScale        uint32

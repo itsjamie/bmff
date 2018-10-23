@@ -8,9 +8,7 @@ import (
 )
 
 type MovieHeader struct {
-	*box
-	version          uint8
-	flags            [3]byte
+	*fullbox
 	CreationTime     uint64
 	ModificationTime uint64
 	TimeScale        uint32
@@ -24,39 +22,40 @@ type MovieHeader struct {
 }
 
 func (b *MovieHeader) parse() error {
-	b.version = b.raw[0]
-	b.flags = [3]byte{b.raw[1], b.raw[2], b.raw[3]}
 	var offset int
 	if b.version == 0 {
-		b.CreationTime = uint64(binary.BigEndian.Uint32(b.raw[4:8]))
-		b.ModificationTime = uint64(binary.BigEndian.Uint32(b.raw[8:12]))
-		b.TimeScale = binary.BigEndian.Uint32(b.raw[12:16])
-		b.Duration = uint64(binary.BigEndian.Uint32(b.raw[16:20]))
-		offset = 20
+		b.CreationTime = uint64(binary.BigEndian.Uint32(b.raw[0:4]))
+		b.ModificationTime = uint64(binary.BigEndian.Uint32(b.raw[4:8]))
+		b.TimeScale = binary.BigEndian.Uint32(b.raw[8:12])
+		b.Duration = uint64(binary.BigEndian.Uint32(b.raw[12:16]))
+		offset = 16
 	} else if b.version == 1 {
-		b.CreationTime = binary.BigEndian.Uint64(b.raw[4:12])
-		b.ModificationTime = binary.BigEndian.Uint64(b.raw[12:20])
-		b.TimeScale = binary.BigEndian.Uint32(b.raw[20:24])
-		b.Duration = binary.BigEndian.Uint64(b.raw[24:32])
-		offset = 32
+		b.CreationTime = binary.BigEndian.Uint64(b.raw[0:8])
+		b.ModificationTime = binary.BigEndian.Uint64(b.raw[8:16])
+		b.TimeScale = binary.BigEndian.Uint32(b.raw[16:20])
+		b.Duration = binary.BigEndian.Uint64(b.raw[20:28])
+		offset = 28
 	}
 
 	if err := b.Rate.UnmarshalBinary(b.raw[offset : offset+4]); err != nil {
 		return errors.Wrap(err, "failed to get rate")
 	}
+	offset += 4
 
-	if err := b.Volume.UnmarshalBinary(b.raw[offset+4 : offset+6]); err != nil {
+	if err := b.Volume.UnmarshalBinary(b.raw[offset : offset+2]); err != nil {
 		return errors.Wrap(err, "failed to get volume")
 	}
+	offset += 2
 
-	b.Reserved = b.raw[offset+6 : offset+16]
-	offset += 16
+	b.Reserved = b.raw[offset : offset+10]
+	offset += 10
 	for i := 0; i < 9; i++ {
 		b.Matrix[i] = int32(binary.BigEndian.Uint32(b.raw[offset+i : offset+i+4]))
 	}
-	offset += 36
-
+	offset += (9 * 4)
 	b.Predefined = b.raw[offset : offset+24]
-	b.NextTrackID = binary.BigEndian.Uint32(b.raw[offset+24 : offset+28])
+	offset += 24
+	b.NextTrackID = binary.BigEndian.Uint32(b.raw[offset : offset+4])
+
 	return nil
 }

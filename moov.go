@@ -2,6 +2,8 @@ package bmff
 
 import (
 	"fmt"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // The Movie Box is short-formed as the type 'moov'.
@@ -9,23 +11,32 @@ import (
 // Normally this box is close to the beginning or end of the file, though this is not required.
 type Movie struct {
 	*box
-	Header *MovieHeader
-	Tracks []*TrakBox
-	Iods   *IodsBox
-	// Meta *MetaBox
-	Unknown []*box
+	Header   *MovieHeader
+	Tracks   []*TrakBox
+	Iods     *IodsBox
+	Metadata *box
+	Unknown  []*box
 }
 
 func (b *Movie) parse() error {
 	for subBox := range readBoxes(b.raw) {
+		var fb *fullbox
+		switch subBox.boxtype {
+		case "mvhd", "iods":
+			fb = &fullbox{box: subBox}
+			if err := fb.decode(); err != nil {
+				return err
+			}
+		}
+
 		switch subBox.boxtype {
 		case "mvhd":
-			b.Header = &MovieHeader{box: subBox}
+			b.Header = &MovieHeader{fullbox: fb}
 			if err := b.Header.parse(); err != nil {
 				return err
 			}
 		case "iods":
-			b.Iods = &IodsBox{box: subBox}
+			b.Iods = &IodsBox{fullbox: fb}
 			if err := b.Iods.parse(); err != nil {
 				return err
 			}
@@ -34,14 +45,15 @@ func (b *Movie) parse() error {
 			if err := trak.parse(); err != nil {
 				return err
 			}
-
+			spew.Dump(trak)
+			spew.Dump(trak.Header.ModificationTime())
 			b.Tracks = append(b.Tracks, trak)
 		default:
-			fmt.Printf("Unknown Moov SubType: %s\n", subBox.Type())
 			b.Unknown = append(b.Unknown, subBox)
+			fmt.Printf("unknown '%s' child: %s\n", b.boxtype, subBox.Type())
+
 		}
 	}
 
-	b.box.raw = nil
 	return nil
 }

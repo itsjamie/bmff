@@ -2,8 +2,6 @@ package bmff
 
 import (
 	"encoding/binary"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // FileType is short-formed as 'ftyp'.
@@ -28,6 +26,5 @@ func (b *FileType) parse() error {
 	}
 
 	b.raw = nil
-	spew.Dump(b)
 	return nil
 }

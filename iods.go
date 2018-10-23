@@ -1,7 +1,7 @@
 package bmff
 
 type IodsBox struct {
-	*box
+	*fullbox
 }
 
 func (b *IodsBox) parse() error {

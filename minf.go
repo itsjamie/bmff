@@ -14,11 +14,18 @@ type MediaInformation struct {
 
 func (b *MediaInformation) parse() error {
 	for subBox := range readBoxes(b.raw) {
+		var fb *fullbox
 		switch subBox.boxtype {
 		case "nmhd":
-			nmhd := &NullMediaHeader{
-				box: subBox,
+			fb = &fullbox{box: subBox}
+			if err := fb.decode(); err != nil {
+				return err
 			}
+		}
+
+		switch subBox.boxtype {
+		case "nmhd":
+			nmhd := &NullMediaHeader{fullbox: fb}
 			if err := nmhd.parse(); err != nil {
 				return err
 			}
@@ -27,9 +34,7 @@ func (b *MediaInformation) parse() error {
 			}
 			b.MediaHeader = nmhd
 		case "dinf":
-			dinf := &DataInformation{
-				box: subBox,
-			}
+			dinf := &DataInformation{box: subBox}
 			if err := dinf.parse(); err != nil {
 				return err
 			}
@@ -44,8 +49,7 @@ func (b *MediaInformation) parse() error {
 			b.SampleTable = stbl
 		default:
 			b.Unknown = append(b.Unknown, subBox)
-			fmt.Printf("unknown minf subtype: %s\n", subBox.boxtype)
-
+			fmt.Printf("unknown '%s' child: %s\n", b.boxtype, subBox.Type())
 		}
 	}
 
@@ -54,14 +58,10 @@ func (b *MediaInformation) parse() error {
 }
 
 type NullMediaHeader struct {
-	*box
-	version uint8
-	flags   [3]byte
+	*fullbox
 }
 
 func (b *NullMediaHeader) parse() error {
-	b.version = b.raw[0]
-	b.flags = [3]byte{b.raw[1], b.raw[2], b.raw[3]}
 	return nil
 }
 
