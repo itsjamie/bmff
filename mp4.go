@@ -2,9 +2,9 @@ package bmff
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 )
 
@@ -47,10 +47,9 @@ readloop:
 			f.Movie = mb
 		default:
 			f.Unknown = append(f.Unknown, b)
+			fmt.Printf("unknown top-level box: %s\n", b.Type())
 		}
 	}
-
-	spew.Dump(f)
 
 	return f, nil
 }

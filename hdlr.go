@@ -18,11 +18,12 @@ type Handler struct {
 }
 
 func (b *Handler) parse() error {
-	b.Predefined = binary.BigEndian.Uint32(b.raw[4:8])
-	b.HandlerType = string(b.raw[8:12])
+	b.Predefined = binary.BigEndian.Uint32(b.raw[0:4])
+	b.HandlerType = string(b.raw[4:8])
 	// skip 12 reserved bytes
-	nameLen := clen(b.raw[24:])
-	b.Name = string(b.raw[24 : 24+nameLen])
+	nameLen := clen(b.raw[20:])
+	b.Name = string(b.raw[20 : 20+nameLen])
 
+	b.raw = nil
 	return nil
 }

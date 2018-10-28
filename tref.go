@@ -1,6 +1,8 @@
 package bmff
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 // TrackReference provides a reference from the containing track to another track in the presentation.
 type TrackReference struct {
@@ -18,6 +20,7 @@ func (b *TrackReference) parse() error {
 		b.TypeBoxes = append(b.TypeBoxes, &t)
 	}
 
+	b.raw = nil
 	return nil
 }
 

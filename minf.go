@@ -6,17 +6,19 @@ import (
 
 type MediaInformation struct {
 	*box
-	DataInformation *DataInformation
-	MediaHeader     *NullMediaHeader
-	SampleTable     *SampleTable
-	Unknown         []*box
+	DataInformation  *DataInformation
+	NullMediaHeader  *NullMediaHeader
+	VideoMediaHeader *VideoMediaHeader
+	SampleTable      *SampleTable
+	Unknown          []*box
 }
 
 func (b *MediaInformation) parse() error {
 	for subBox := range readBoxes(b.raw) {
 		var fb *fullbox
 		switch subBox.boxtype {
-		case "nmhd":
+		case "nmhd",
+			"vmhd":
 			fb = &fullbox{box: subBox}
 			if err := fb.decode(); err != nil {
 				return err
@@ -29,10 +31,19 @@ func (b *MediaInformation) parse() error {
 			if err := nmhd.parse(); err != nil {
 				return err
 			}
-			if b.MediaHeader != nil {
-				return fmt.Errorf("media header already populated for track: %v", b.MediaHeader)
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil {
+				return fmt.Errorf("media header already populated for track: %v", b)
 			}
-			b.MediaHeader = nmhd
+			b.NullMediaHeader = nmhd
+		case "vmhd":
+			vmhd := &VideoMediaHeader{fullbox: fb}
+			if err := vmhd.parse(); err != nil {
+				return err
+			}
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil {
+				return fmt.Errorf("media header already populated for track: %v", b)
+			}
+			b.VideoMediaHeader = vmhd
 		case "dinf":
 			dinf := &DataInformation{box: subBox}
 			if err := dinf.parse(); err != nil {
@@ -40,9 +51,7 @@ func (b *MediaInformation) parse() error {
 			}
 			b.DataInformation = dinf
 		case "stbl":
-			stbl := &SampleTable{
-				box: subBox,
-			}
+			stbl := &SampleTable{box: subBox}
 			if err := stbl.parse(); err != nil {
 				return err
 			}
@@ -63,7 +72,4 @@ type NullMediaHeader struct {
 
 func (b *NullMediaHeader) parse() error {
 	return nil
-}
-
-type VideoMediaHeader struct {
 }

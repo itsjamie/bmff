@@ -58,6 +58,7 @@ func (b *TrackHeader) parse() error {
 	b.Width = fixed.Uint16_16(binary.BigEndian.Uint32(b.raw[offset : offset+4]))
 	offset += 4
 	b.Height = fixed.Uint16_16(binary.BigEndian.Uint32(b.raw[offset : offset+4]))
+	b.raw = nil
 	return nil
 }
 

@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"io"
 	"io/ioutil"
+	"log"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/pkg/errors"
 )
 
@@ -14,9 +14,10 @@ const boxHeaderSize = 8
 
 func newBox(src io.Reader) (*box, error) {
 	b := &box{}
-	err := b.decode(src)
-
-	return b, err
+	if err := b.decode(src); err != nil {
+		return nil, err
+	}
+	return b, nil
 }
 
 type box struct {
@@ -26,37 +27,11 @@ type box struct {
 	raw       []byte
 }
 
-func (b *box) Size() uint64 {
-	if b == nil {
-		return 0
-	}
-
-	if b.size == 1 {
-		return b.largesize
-	}
-	return uint64(b.size)
-}
-
-func (b *box) Type() string {
-	return b.boxtype
-}
-
-func (b *box) Raw() []byte {
-	return b.raw
-}
-
-type fullbox struct {
-	*box
-	version uint8
-	flags   uint32
-}
-
 func (b *box) decode(src io.Reader) error {
 	header := make([]byte, 8)
 	if _, err := io.ReadFull(src, header); err != nil {
-		return errors.Wrapf(err, "bad read of box header: %x", header)
+		return errors.Wrapf(err, "error reading box header: %x", header)
 	}
-	spew.Dump(header)
 
 	b.size = binary.BigEndian.Uint32(header[0:4])
 	b.boxtype = string(header[4:8])
@@ -88,6 +63,31 @@ func (b *box) decode(src io.Reader) error {
 	return nil
 }
 
+func (b *box) Size() uint64 {
+	if b == nil {
+		return 0
+	}
+
+	if b.size == 1 {
+		return b.largesize
+	}
+	return uint64(b.size)
+}
+
+func (b *box) Type() string {
+	return b.boxtype
+}
+
+func (b *box) Raw() []byte {
+	return b.raw
+}
+
+type fullbox struct {
+	*box
+	version uint8
+	flags   uint32
+}
+
 func (b *fullbox) decode() error {
 	if len(b.raw) < 4 {
 		return errors.Errorf("failed decode of fullbox type %s, missing data", b.box.boxtype)
@@ -110,10 +110,16 @@ func readBoxes(buf []byte) <-chan *box {
 				switch errors.Cause(err) {
 				case io.EOF:
 					eof = true
+				default:
+					log.Fatal(err)
 				}
 			}
 
 			if b != nil {
+				log.Println("newBox - " + b.boxtype)
+				if b.boxtype != "mdat" {
+					// spew.Dump(b)
+				}
 				boxes <- b
 			}
 		}

@@ -2,8 +2,6 @@ package bmff
 
 import (
 	"fmt"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // The Movie Box is short-formed as the type 'moov'.
@@ -45,8 +43,6 @@ func (b *Movie) parse() error {
 			if err := trak.parse(); err != nil {
 				return err
 			}
-			spew.Dump(trak)
-			spew.Dump(trak.Header.ModificationTime())
 			b.Tracks = append(b.Tracks, trak)
 		default:
 			b.Unknown = append(b.Unknown, subBox)

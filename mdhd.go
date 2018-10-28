@@ -1,11 +1,14 @@
 package bmff
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"time"
+)
 
 type MediaHeader struct {
 	*fullbox
-	CreationTime     uint64
-	ModificationTime uint64
+	creationTime     uint64
+	modificationTime uint64
 	TimeScale        uint32
 	Duration         uint64
 	LanguageCode     string
@@ -16,17 +19,17 @@ func (b *MediaHeader) parse() error {
 	var offset int
 	raw := b.Raw()
 	if b.version == 0 {
-		b.CreationTime = uint64(binary.BigEndian.Uint32(raw[4:8]))
-		b.ModificationTime = uint64(binary.BigEndian.Uint32(raw[8:12]))
-		b.TimeScale = binary.BigEndian.Uint32(raw[12:16])
-		b.Duration = uint64(binary.BigEndian.Uint32(raw[16:20]))
-		offset = 20
+		b.creationTime = uint64(binary.BigEndian.Uint32(raw[0:4]))
+		b.modificationTime = uint64(binary.BigEndian.Uint32(raw[4:8]))
+		b.TimeScale = binary.BigEndian.Uint32(raw[8:12])
+		b.Duration = uint64(binary.BigEndian.Uint32(raw[12:16]))
+		offset = 16
 	} else if b.version == 1 {
-		b.CreationTime = binary.BigEndian.Uint64(raw[4:12])
-		b.ModificationTime = binary.BigEndian.Uint64(raw[12:20])
-		b.TimeScale = binary.BigEndian.Uint32(raw[20:24])
-		b.Duration = binary.BigEndian.Uint64(raw[24:32])
-		offset = 32
+		b.creationTime = binary.BigEndian.Uint64(raw[0:8])
+		b.modificationTime = binary.BigEndian.Uint64(raw[8:16])
+		b.TimeScale = binary.BigEndian.Uint32(raw[16:20])
+		b.Duration = binary.BigEndian.Uint64(raw[20:28])
+		offset = 28
 	}
 
 	lang := binary.BigEndian.Uint16(raw[offset : offset+2]) // first bit is padding
@@ -37,5 +40,18 @@ func (b *MediaHeader) parse() error {
 	})
 	b.Predefined = binary.BigEndian.Uint16(raw[offset+2 : offset+4])
 
+	b.raw = nil
 	return nil
+}
+
+// CreationTime is when this track was created
+func (b *MediaHeader) CreationTime() time.Time {
+	epoch := time.Date(1904, 1, 1, 0, 0, 0, 0, time.UTC)
+	return epoch.Add(time.Duration(b.creationTime) * time.Second)
+}
+
+// ModificationTime is when this track was most recently edited
+func (b *MediaHeader) ModificationTime() time.Time {
+	epoch := time.Date(1904, 1, 1, 0, 0, 0, 0, time.UTC)
+	return epoch.Add(time.Duration(b.modificationTime) * time.Second)
 }
