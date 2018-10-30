@@ -117,9 +117,6 @@ func readBoxes(buf []byte) <-chan *box {
 
 			if b != nil {
 				log.Println("newBox - " + b.boxtype)
-				if b.boxtype != "mdat" {
-					// spew.Dump(b)
-				}
 				boxes <- b
 			}
 		}

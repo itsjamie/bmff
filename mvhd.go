@@ -57,5 +57,6 @@ func (b *MovieHeader) parse() error {
 	offset += 24
 	b.NextTrackID = binary.BigEndian.Uint32(b.raw[offset : offset+4])
 
+	b.raw = nil
 	return nil
 }

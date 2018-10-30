@@ -2,8 +2,6 @@ package bmff
 
 import (
 	"encoding/binary"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type UserData struct {
@@ -35,7 +33,8 @@ func (b *UserData) parse() error {
 		}
 
 	}
-	spew.Dump(b)
+
+	b.raw = nil
 	return nil
 }
 
@@ -53,6 +52,7 @@ func (b *Copyright) parse() error {
 		uint8(lang&0x001F) + 0x60,
 	})
 	b.Data = string(b.raw[2:])
-	spew.Dump(b)
+
+	b.raw = nil
 	return nil
 }

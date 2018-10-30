@@ -23,6 +23,7 @@ func (b *SampleToChunk) parse() error {
 		offset += 12
 	}
 
+	b.raw = nil
 	return nil
 }
 

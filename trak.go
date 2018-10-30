@@ -48,5 +48,6 @@ func (b *TrakBox) parse() error {
 
 	}
 
+	b.raw = nil
 	return nil
 }

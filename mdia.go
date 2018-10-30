@@ -46,5 +46,6 @@ func (b *Media) parse() error {
 		}
 	}
 
+	b.raw = nil
 	return nil
 }

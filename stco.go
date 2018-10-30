@@ -33,5 +33,7 @@ func (b *ChunkLargeOffset) parse() error {
 		b.Entries = append(b.Entries, binary.BigEndian.Uint64(b.raw[offset:offset+8]))
 		offset += 8
 	}
+
+	b.raw = nil
 	return nil
 }

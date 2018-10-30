@@ -24,5 +24,6 @@ func (b *SampleSize) parse() error {
 		offset += 4
 	}
 
+	b.raw = nil
 	return nil
 }

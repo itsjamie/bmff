@@ -58,5 +58,6 @@ func (b *Movie) parse() error {
 		}
 	}
 
+	b.raw = nil
 	return nil
 }

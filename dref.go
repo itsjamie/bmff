@@ -42,6 +42,7 @@ func (b *DataReference) parse() error {
 		}
 	}
 
+	b.raw = nil
 	return nil
 }
 

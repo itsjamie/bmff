@@ -49,5 +49,6 @@ func (b *CompositionOffset) parse() error {
 		log.Fatal("unknown ctts version: ", b.version)
 	}
 
+	b.raw = nil
 	return nil
 }

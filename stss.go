@@ -17,5 +17,7 @@ func (b *SyncSample) parse() error {
 		b.Entries = append(b.Entries, binary.BigEndian.Uint32(b.raw[offset:offset+4]))
 		offset += 4
 	}
+
+	b.raw = nil
 	return nil
 }

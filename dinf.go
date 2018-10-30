@@ -26,5 +26,6 @@ func (b *DataInformation) parse() error {
 		}
 	}
 
+	b.raw = nil
 	return nil
 }

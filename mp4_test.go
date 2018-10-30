@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 func readerFromFixture(t *testing.T, path string) io.Reader {
@@ -45,13 +47,13 @@ func TestParse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := Parse(tt.args.src)
+			f, err := Parse(tt.args.src)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
-			// spew.Dump(f.Movie.Tracks[0].Media)
+			spew.Dump(f)
 		})
 	}
 }

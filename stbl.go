@@ -91,5 +91,6 @@ func (b *SampleTable) parse() error {
 		}
 	}
 
+	b.raw = nil
 	return nil
 }

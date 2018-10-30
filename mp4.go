@@ -9,14 +9,19 @@ import (
 )
 
 type File struct {
-	Type    *FileType
-	Movie   *Movie
-	Unknown []*box
+	Type      *FileType
+	Movie     *Movie
+	MediaData []*box
+	Free      []*box
+	Unknown   []*box
+
+	freeSkipBeforeMdat bool
 }
 
 func Parse(src io.Reader) (*File, error) {
 	f := &File{}
 	r := bufio.NewReader(src)
+	var parseFreeOrSkip bool
 
 readloop:
 	for {
@@ -45,6 +50,15 @@ readloop:
 				return nil, err
 			}
 			f.Movie = mb
+		case "mdat":
+			if parseFreeOrSkip {
+				f.freeSkipBeforeMdat = true
+			}
+
+			f.MediaData = append(f.MediaData, b)
+		case "skip", "free":
+			f.Free = append(f.Free, b)
+			parseFreeOrSkip = true
 		default:
 			f.Unknown = append(f.Unknown, b)
 			fmt.Printf("unknown top-level box: %s\n", b.Type())

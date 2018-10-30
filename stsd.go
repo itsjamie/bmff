@@ -28,6 +28,7 @@ func (b *SampleDescription) parse() error {
 		return errors.New("SampleEntries > entryCount")
 	}
 
+	b.raw = nil
 	return nil
 }
 
