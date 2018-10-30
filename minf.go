@@ -9,6 +9,7 @@ type MediaInformation struct {
 	DataInformation  *DataInformation
 	NullMediaHeader  *NullMediaHeader
 	VideoMediaHeader *VideoMediaHeader
+	SoundMediaHeader *SoundMediaHeader
 	SampleTable      *SampleTable
 	Unknown          []*box
 }
@@ -18,6 +19,7 @@ func (b *MediaInformation) parse() error {
 		var fb *fullbox
 		switch subBox.boxtype {
 		case "nmhd",
+			"smhd",
 			"vmhd":
 			fb = &fullbox{box: subBox}
 			if err := fb.decode(); err != nil {
@@ -31,7 +33,7 @@ func (b *MediaInformation) parse() error {
 			if err := nmhd.parse(); err != nil {
 				return err
 			}
-			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil {
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil {
 				return fmt.Errorf("media header already populated for track: %v", b)
 			}
 			b.NullMediaHeader = nmhd
@@ -40,10 +42,19 @@ func (b *MediaInformation) parse() error {
 			if err := vmhd.parse(); err != nil {
 				return err
 			}
-			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil {
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil {
 				return fmt.Errorf("media header already populated for track: %v", b)
 			}
 			b.VideoMediaHeader = vmhd
+		case "smhd":
+			smhd := &SoundMediaHeader{fullbox: fb}
+			if err := smhd.parse(); err != nil {
+				return err
+			}
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil {
+				return fmt.Errorf("media header already populated for track: %v", b)
+			}
+			b.SoundMediaHeader = smhd
 		case "dinf":
 			dinf := &DataInformation{box: subBox}
 			if err := dinf.parse(); err != nil {

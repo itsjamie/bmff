@@ -6,9 +6,11 @@ import (
 
 type SampleTable struct {
 	*box
+	Ctts    *CompositionOffset
 	Stsd    *SampleDescription
 	Stts    *TimeToSample
 	Stsc    *SampleToChunk
+	Stss    *SyncSample
 	Stsz    *SampleSize
 	Stco    *ChunkOffset
 	Co64    *ChunkLargeOffset
@@ -21,11 +23,13 @@ func (b *SampleTable) parse() error {
 		switch subBox.boxtype {
 		case
 			"stsd", // Sample Description
+			"stss", // Sync Sample
 			"stts", // Time to Sample
 			"stsc", // Sample to Chunk
 			"stsz", // Sample Size
 			"stco", // Chunk Offset 32 bit
-			"co64": // Chunk Offset 64 bit
+			"co64", // Chunk Offset 64 bit
+			"ctts": // Composition Offset
 			fb = &fullbox{box: subBox}
 			if err := fb.decode(); err != nil {
 				return err
@@ -51,6 +55,12 @@ func (b *SampleTable) parse() error {
 				return err
 			}
 			b.Stsc = stsc
+		case "stss":
+			stss := &SyncSample{fullbox: fb}
+			if err := stss.parse(); err != nil {
+				return err
+			}
+			b.Stss = stss
 		case "stsz":
 			stsz := &SampleSize{fullbox: fb}
 			if err := stsz.parse(); err != nil {
@@ -69,6 +79,12 @@ func (b *SampleTable) parse() error {
 				return err
 			}
 			b.Co64 = co64
+		case "ctts":
+			ctts := &CompositionOffset{fullbox: fb}
+			if err := ctts.parse(); err != nil {
+				return err
+			}
+			b.Ctts = ctts
 		default:
 			b.Unknown = append(b.Unknown, subBox)
 			fmt.Printf("unknown '%s' child: %s\n", b.boxtype, subBox.Type())

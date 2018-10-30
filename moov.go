@@ -13,6 +13,7 @@ type Movie struct {
 	Tracks   []*TrakBox
 	Iods     *IodsBox
 	Metadata *box
+	UserData *UserData
 	Unknown  []*box
 }
 
@@ -44,6 +45,12 @@ func (b *Movie) parse() error {
 				return err
 			}
 			b.Tracks = append(b.Tracks, trak)
+		case "udta":
+			udta := &UserData{box: subBox}
+			if err := udta.parse(); err != nil {
+				return err
+			}
+			b.UserData = udta
 		default:
 			b.Unknown = append(b.Unknown, subBox)
 			fmt.Printf("unknown '%s' child: %s\n", b.boxtype, subBox.Type())
