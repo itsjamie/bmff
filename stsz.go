@@ -3,7 +3,6 @@ package bmff
 import (
 	"encoding/binary"
 	"errors"
-	"log"
 
 	"github.com/itsjamie/bmff/internal/mp4bits"
 )
@@ -52,7 +51,7 @@ func (b *CompactSampleSize) parse() error {
 
 			b.Entries = append(b.Entries, uint16(hb.High()))
 			b.Entries = append(b.Entries, uint16(hb.Low()))
-			log.Fatal("compact 4 bit sample size not implemented")
+			offset++
 		case 8:
 			b.Entries = append(b.Entries, uint16(b.raw[offset]))
 			offset++
