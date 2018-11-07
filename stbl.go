@@ -12,6 +12,7 @@ type SampleTable struct {
 	Stsc    *SampleToChunk
 	Stss    *SyncSample
 	Stsz    *SampleSize
+	Stz2    *CompactSampleSize
 	Stco    *ChunkOffset
 	Co64    *ChunkLargeOffset
 	Unknown []*box
@@ -27,6 +28,7 @@ func (b *SampleTable) parse() error {
 			"stts", // Time to Sample
 			"stsc", // Sample to Chunk
 			"stsz", // Sample Size
+			"stz2", // Compact Sample Size
 			"stco", // Chunk Offset 32 bit
 			"co64", // Chunk Offset 64 bit
 			"ctts": // Composition Offset
@@ -67,6 +69,12 @@ func (b *SampleTable) parse() error {
 				return err
 			}
 			b.Stsz = stsz
+		case "stz2":
+			stz2 := &CompactSampleSize{fullbox: fb}
+			if err := stz2.parse(); err != nil {
+				return err
+			}
+			b.Stz2 = stz2
 		case "stco":
 			stco := &ChunkOffset{fullbox: fb}
 			if err := stco.parse(); err != nil {

@@ -9,6 +9,8 @@ type TrakBox struct {
 	Header    *TrackHeader
 	Reference *TrackReference
 	Media     *Media
+	EditBox   *EditBox
+	UserData  *UserData
 }
 
 func (b *TrakBox) parse() error {
@@ -20,7 +22,6 @@ func (b *TrakBox) parse() error {
 			if err := fb.decode(); err != nil {
 				return err
 			}
-
 		}
 
 		switch subBox.boxtype {
@@ -42,6 +43,18 @@ func (b *TrakBox) parse() error {
 				return err
 			}
 			b.Media = mdia
+		case "edts":
+			edts := &EditBox{box: subBox}
+			if err := edts.parse(); err != nil {
+				return err
+			}
+			b.EditBox = edts
+		case "udta":
+			udta := &UserData{box: subBox}
+			if err := udta.parse(); err != nil {
+				return err
+			}
+			b.UserData = udta
 		default:
 			return fmt.Errorf("unknown 'trak' child: %s", subBox.Type())
 		}

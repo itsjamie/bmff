@@ -88,6 +88,10 @@ type fullbox struct {
 	flags   uint32
 }
 
+func (b *fullbox) Version() int {
+	return int(b.version)
+}
+
 func (b *fullbox) decode() error {
 	if len(b.raw) < 4 {
 		return errors.Errorf("failed decode of fullbox type %s, missing data", b.box.boxtype)

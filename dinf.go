@@ -1,8 +1,11 @@
 package bmff
 
+import "fmt"
+
 type DataInformation struct {
 	*box
 	Reference *DataReference
+	Unknown   []*box
 }
 
 func (b *DataInformation) parse() error {
@@ -23,6 +26,9 @@ func (b *DataInformation) parse() error {
 				return err
 			}
 			b.Reference = ref
+		default:
+			b.Unknown = append(b.Unknown, subBox)
+			fmt.Printf("unknown '%s' child: %s\n", b.boxtype, subBox.Type())
 		}
 	}
 

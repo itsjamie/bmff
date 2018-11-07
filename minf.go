@@ -10,6 +10,7 @@ type MediaInformation struct {
 	NullMediaHeader  *NullMediaHeader
 	VideoMediaHeader *VideoMediaHeader
 	SoundMediaHeader *SoundMediaHeader
+	HintMediaHeader  *HintMediaHeader
 	SampleTable      *SampleTable
 	Unknown          []*box
 }
@@ -20,6 +21,7 @@ func (b *MediaInformation) parse() error {
 		switch subBox.boxtype {
 		case "nmhd",
 			"smhd",
+			"hmhd",
 			"vmhd":
 			fb = &fullbox{box: subBox}
 			if err := fb.decode(); err != nil {
@@ -33,7 +35,7 @@ func (b *MediaInformation) parse() error {
 			if err := nmhd.parse(); err != nil {
 				return err
 			}
-			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil {
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil || b.HintMediaHeader != nil {
 				return fmt.Errorf("media header already populated for track: %v", b)
 			}
 			b.NullMediaHeader = nmhd
@@ -42,7 +44,7 @@ func (b *MediaInformation) parse() error {
 			if err := vmhd.parse(); err != nil {
 				return err
 			}
-			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil {
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil || b.HintMediaHeader != nil {
 				return fmt.Errorf("media header already populated for track: %v", b)
 			}
 			b.VideoMediaHeader = vmhd
@@ -51,10 +53,19 @@ func (b *MediaInformation) parse() error {
 			if err := smhd.parse(); err != nil {
 				return err
 			}
-			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil {
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil || b.HintMediaHeader != nil {
 				return fmt.Errorf("media header already populated for track: %v", b)
 			}
 			b.SoundMediaHeader = smhd
+		case "hmhd":
+			hmhd := &HintMediaHeader{fullbox: fb}
+			if err := hmhd.parse(); err != nil {
+				return err
+			}
+			if b.NullMediaHeader != nil || b.VideoMediaHeader != nil || b.SoundMediaHeader != nil || b.HintMediaHeader != nil {
+				return fmt.Errorf("media header already populated for track: %v", b)
+			}
+			b.HintMediaHeader = hmhd
 		case "dinf":
 			dinf := &DataInformation{box: subBox}
 			if err := dinf.parse(); err != nil {

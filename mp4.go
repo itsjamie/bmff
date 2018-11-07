@@ -12,6 +12,7 @@ type File struct {
 	Type      *FileType
 	Movie     *Movie
 	MediaData []*box
+	Metadata  *Metadata
 	Free      []*box
 	Unknown   []*box
 
@@ -56,6 +57,17 @@ readloop:
 			}
 
 			f.MediaData = append(f.MediaData, b)
+		case "meta":
+			fb := &fullbox{box: b}
+			if err := fb.decode(); err != nil {
+				return nil, err
+			}
+
+			meta := &Metadata{fullbox: fb}
+			if err := meta.parse(); err != nil {
+				return nil, err
+			}
+			f.Metadata = meta
 		case "skip", "free":
 			f.Free = append(f.Free, b)
 			parseFreeOrSkip = true

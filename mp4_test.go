@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 func readerFromFixture(t *testing.T, path string) io.Reader {
@@ -31,29 +29,71 @@ func TestParse(t *testing.T) {
 		want    File
 		wantErr bool
 	}{
+		// {
+		// 	name: "01_simple.mp4",
+		// 	args: args{
+		// 		src: readerFromFixture(t, filepath.Join("testdata", "01_simple.mp4")),
+		// 	},
+		// 	want: File{
+		// 		Movie: &Movie{
+		// 			box: &box{
+		// 				boxtype: "ftyp",
+		// 			},
+		// 		},
+		// 	},
+		// },
+		// {
+		// 	name: "02_dref_edts_img.mp4",
+		// 	args: args{
+		// 		src: readerFromFixture(t, filepath.Join("testdata", "02_dref_edts_img.mp4")),
+		// 	},
+		// 	want: File{},
+		// },
+		// {
+		// 	name: "03_hinted.mp4",
+		// 	args: args{
+		// 		src: readerFromFixture(t, filepath.Join("testdata", "03_hinted.mp4")),
+		// 	},
+		// 	want: File{},
+		// },
+		// {
+		// 	name: "04_bifs_video.mp4",
+		// 	args: args{
+		// 		src: readerFromFixture(t, filepath.Join("testdata", "04_bifs_video.mp4")),
+		// 	},
+		// 	want: File{},
+		// },
+		// {
+		// 	name: "05_bifs_video_protected_v2.mp4",
+		// 	args: args{
+		// 		src: readerFromFixture(t, filepath.Join("testdata", "05_bifs_video_protected_v2.mp4")),
+		// 	},
+		// 	want: File{},
+		// },
+		// {
+		// 	name: "06_bifs.mp4",
+		// 	args: args{
+		// 		src: readerFromFixture(t, filepath.Join("testdata", "06_bifs.mp4")),
+		// 	},
+		// 	want: File{},
+		// },
 		{
-			name: "Test box parsing",
+			name: "07_bifs_sprite.mp4",
 			args: args{
-				src: readerFromFixture(t, filepath.Join("testdata", "01_simple.mp4")),
+				src: readerFromFixture(t, filepath.Join("testdata", "07_bifs_sprite.mp4")),
 			},
-			want: File{
-				Movie: &Movie{
-					box: &box{
-						boxtype: "ftyp",
-					},
-				},
-			},
+			want: File{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, err := Parse(tt.args.src)
+			_, err := Parse(tt.args.src)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
-			spew.Dump(f)
+			// spew.Dump(f)
 		})
 	}
 }
