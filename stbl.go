@@ -8,11 +8,13 @@ type SampleTable struct {
 	*box
 	Ctts    *CompositionOffset
 	Stsd    *SampleDescription
+	Sdtp    *SampleDependenciesTable
 	Stts    *TimeToSample
 	Stsc    *SampleToChunk
 	Stss    *SyncSample
 	Stsz    *SampleSize
 	Stz2    *CompactSampleSize
+	Stsh    *ShadowSyncSample
 	Stco    *ChunkOffset
 	Co64    *ChunkLargeOffset
 	Unknown []*box
@@ -24,11 +26,13 @@ func (b *SampleTable) parse() error {
 		switch subBox.boxtype {
 		case
 			"stsd", // Sample Description
+			"sdtp", // Sample Dependencies Type
 			"stss", // Sync Sample
 			"stts", // Time to Sample
 			"stsc", // Sample to Chunk
 			"stsz", // Sample Size
 			"stz2", // Compact Sample Size
+			"stsh", // ShadowSync
 			"stco", // Chunk Offset 32 bit
 			"co64", // Chunk Offset 64 bit
 			"ctts": // Composition Offset
@@ -45,6 +49,12 @@ func (b *SampleTable) parse() error {
 				return err
 			}
 			b.Stsd = stsd
+		case "sdtp":
+			sdtp := &SampleDependenciesTable{fullbox: fb}
+			if err := sdtp.parse(); err != nil {
+				return err
+			}
+			b.Sdtp = sdtp
 		case "stts":
 			stts := &TimeToSample{fullbox: fb}
 			if err := stts.parse(); err != nil {
@@ -75,6 +85,12 @@ func (b *SampleTable) parse() error {
 				return err
 			}
 			b.Stz2 = stz2
+		case "stsh":
+			stsh := &ShadowSyncSample{fullbox: fb}
+			if err := stsh.parse(); err != nil {
+				return err
+			}
+			b.Stsh = stsh
 		case "stco":
 			stco := &ChunkOffset{fullbox: fb}
 			if err := stco.parse(); err != nil {

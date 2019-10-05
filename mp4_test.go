@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 func readerFromFixture(t *testing.T, path string) io.Reader {
@@ -77,23 +79,30 @@ func TestParse(t *testing.T) {
 		// 	},
 		// 	want: File{},
 		// },
+		// {
+		// 	name: "07_bifs_sprite.mp4",
+		// 	args: args{
+		// 		src: readerFromFixture(t, filepath.Join("testdata", "07_bifs_sprite.mp4")),
+		// 	},
+		// 	want: File{},
+		// },
 		{
-			name: "07_bifs_sprite.mp4",
+			name: "08_bifs_carousel_v2.mp4",
 			args: args{
-				src: readerFromFixture(t, filepath.Join("testdata", "07_bifs_sprite.mp4")),
+				src: readerFromFixture(t, filepath.Join("testdata", "08_bifs_carousel_v2.mp4")),
 			},
 			want: File{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := Parse(tt.args.src)
+			f, err := Parse(tt.args.src)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
-			// spew.Dump(f)
+			spew.Dump(f)
 		})
 	}
 }
